@@ -1,5 +1,6 @@
 package cn.sspku.zx.aad.daily;
 
+
 /**
  * Given n non-negative integers representing an elevation map where the width
  * of each bar is 1, compute how much water it is able to trap after raining.
@@ -25,7 +26,7 @@ public class TappingRainWater {
 			} else
 				shadows += height[idx];
 		}
-		System.out.println(max+" "+lMaxIndex);
+		System.out.println(max + " " + lMaxIndex);
 		// 从右到左，右下坡计算最大值
 		int rMaxIndex = height.length - 1;
 		shadows = 0;
@@ -51,8 +52,8 @@ public class TappingRainWater {
 
 	public static void main(String[] args) {
 		TappingRainWater trw = new TappingRainWater();
-		System.out.println(trw.trap(new int[] { 0, 1, 0, 2, 1, 0, 1, 3,2,3, 2, 1,
-				2, 1 }));
+		System.out.println(trw.trap(new int[] { 0, 1, 0, 2, 1, 0, 1, 3, 2, 3,
+				2, 1, 2, 1 }));
 
 	}
 }

@@ -17,7 +17,35 @@ public class Utils {
 		}
 	}
 
+	public static void PrintString(List<String> list) {
+		Iterator<String> it = list.iterator();
+		while (it.hasNext()) {
+			System.out.println(it.next());
+		}
+	}
+
 	public static void Print(String str) {
 		System.out.println(str);
+	}
+
+	public static void Print(int[] array)
+	{
+		for(int idx=0;idx<array.length;++idx)
+			System.out.printf("%5d", array[idx]);
+		System.out.println();
+	}
+	
+	public static void PrintListString(List<List<String>> list2) {
+		Iterator<List<String>> listIt = list2.iterator();
+		List<String> list;
+		while (listIt.hasNext()) {
+			list = listIt.next();
+			Iterator<String> it = list.iterator();
+			while (it.hasNext()) {
+				System.out.print("  " + it.next());
+			}
+			System.out.println();
+		}
+
 	}
 }

@@ -1,4 +1,5 @@
 package cn.sspku.zx.aad.daily;
+
 /**
  * Given n non-negative integers a1, a2, ..., an, where each represents a point
  * at coordinate (i, ai). n vertical lines are drawn such that the two endpoints
@@ -11,28 +12,38 @@ package cn.sspku.zx.aad.daily;
  * 
  */
 public class ContainerWithMostWater {
+	/**
+	 * 选定最左边和最右边的两条线，如果有更大的水槽，一定是较短的那一边到中间扩展过程中相对自身更高的线段替代
+	 * 
+	 * @param height
+	 * @return
+	 */
 	public int maxArea(int[] height) {
 		if (null == height || height.length < 2)
 			return 0;
 
-		// 从左到右，左上坡计算最大值
-		int lMaxIndex = 0, max = 0, capacity;
-		for (int idx = 1; idx < height.length; ++idx) {
-			if (height[idx] > height[lMaxIndex]) {
-				lMaxIndex = idx;
-			}
-		}
-
-		// 从右到左，右下坡计算最大值
-		int rMaxIndex = height.length - 1;
-		for (int idx = height.length - 1; idx > lMaxIndex; --idx) {
-			if (height[idx] > height[rMaxIndex]) {
-				capacity = height[rMaxIndex] * (rMaxIndex - idx + 1);
-				if (capacity > max) {
-					max = capacity;
-				}
-
-				rMaxIndex = idx;
+		int left = 0, right = height.length - 1, max = (right - left)
+				* Math.min(height[left], height[right]), seg;
+		while (left < right) {
+			if (height[left] < height[right]) {
+				seg = 1;
+				while (left + seg < right && height[left + seg] <= height[left])
+					++seg;
+				if (left + seg >= right)
+					return max;
+				left += seg;
+				max = Math.max(max,
+						(right - left) * Math.min(height[left], height[right]));
+			} else {
+				seg = 1;
+				while (right - seg > left
+						&& height[right - seg] <= height[right])
+					++seg;
+				if (right - seg <= left)
+					return max;
+				right -= seg;
+				max = Math.max(max,
+						(right - left) * Math.min(height[left], height[right]));
 			}
 		}
 
@@ -40,6 +51,9 @@ public class ContainerWithMostWater {
 	}
 
 	public static void main(String[] args) {
+		Utils.Print(""
+				+ new ContainerWithMostWater().maxArea(new int[] { 1, 2, 4, 3,
+						5 }));
 
 	}
 }

@@ -1,5 +1,7 @@
 package cn.sspku.zx.aad.daily;
 
+import java.util.Stack;
+
 /**
  * Given a 2D binary matrix filled with 0's and 1's, find the largest rectangle
  * containing all ones and return its area.
@@ -37,7 +39,7 @@ public class MaximalRectangle {
 	}
 
 	public int maximalRectangle(char[][] matrix) {
-		if (null == matrix || matrix.length == 0)
+		if (null == matrix || matrix.length == 0 || matrix[0].length == 0)
 			return 0;
 
 		int rows = matrix.length, cols = matrix[0].length;
@@ -98,10 +100,10 @@ public class MaximalRectangle {
 								areas[r - 1][c].height) + 1;
 					} else {
 						if (areas[r][c - 1].width > areas[r - 1][c].height) {
-							w = areas[r][c - 1].width+1;
+							w = areas[r][c - 1].width + 1;
 							h = 1;
 						} else {
-							h = areas[r - 1][c].height+1;
+							h = areas[r - 1][c].height + 1;
 							w = 1;
 						}
 					}
@@ -120,6 +122,56 @@ public class MaximalRectangle {
 		return maxArea;
 	}
 
+	public int maximalRectangle2(char[][] matrix) {
+		if (null == matrix || matrix.length == 0 || matrix[0].length == 0)
+			return 0;
+
+		int height = matrix.length, width = matrix[0].length;
+		int[][] colLens = new int[height][width];
+		// 记录每一个cell以当前cell为底，以当前列为列，‘1’的高度
+		for (int col = 0; col < width; ++col) {
+			int r = 0, colHeight;
+			while (r < height) {
+				while (r < height && matrix[r][col] == '0')
+					colLens[r++][col] = 0;
+				colHeight = 0;
+				while (r < height && matrix[r][col] == '1')
+					colLens[r++][col] = ++colHeight;
+			}
+		}
+
+		int maxArea = 0;
+		Stack<Integer> indexStack = new Stack<Integer>();
+		// 统计以所在行为底的矩形最大值
+		for (int row = 0; row < height; ++row) {
+			int c = 0, startIndex, area;
+			while (c < width) {
+				while (c < width && matrix[row][c] == '0')
+					++c;
+				startIndex = c;
+				while (c < width && matrix[row][c] == '1') {
+					if (indexStack.size() == 0
+							|| colLens[row][indexStack.peek()] <= colLens[row][c])
+						indexStack.push(c++);
+					else {
+						area = colLens[row][indexStack.pop()]
+								* (indexStack.size() == 0 ? (c - startIndex)
+										: (c - 1 - indexStack.peek()));
+						maxArea = Math.max(maxArea, area);
+					}
+				}
+				while (indexStack.size() > 0) {
+					area = colLens[row][indexStack.pop()]
+							* (indexStack.size() == 0 ? (c - startIndex)
+									: (c - 1 - indexStack.peek()));
+					maxArea = Math.max(maxArea, area);
+				}
+			}
+		}
+
+		return maxArea;
+	}
+
 	public static void main(String[] args) {
 		MaximalRectangle mr = new MaximalRectangle();
 		char[][] matrix = new char[][] {
@@ -128,20 +180,20 @@ public class MaximalRectangle {
 				{ '1', '1', '1', '0', '0', '1', '0', '1' },
 				{ '1', '0', '1', '1', '1', '1', '1', '0' },
 				{ '0', '0', '0', '1', '1', '1', '1', '0' } };
-		char[][] matrix2 = new char[][] {
-				{ '0', '0', '0', '1', '0', '1', '1', '1' },
-				{ '0', '1', '1', '0', '0', '1', '0', '1' },
-				{ '1', '0', '1', '1', '1', '1', '0', '1' },
-				{ '0', '0', '0', '1', '0', '0', '0', '0' },
-				{ '0', '0', '1', '0', '0', '0', '1', '0' },
-				{ '1', '1', '1', '0', '0', '1', '1', '1' },
-				{ '1', '0', '0', '1', '1', '0', '0', '1' },
-				{ '0', '1', '0', '0', '1', '1', '0', '0' },
-				{ '1', '0', '0', '1', '0', '0', '0', '0' } };
-		char[][] matrix3 = new char[][] { { '0', '1', '0', '0', '0' },
-				{ '1', '0', '0', '1', '1' }, { '1', '0', '0', '1', '1' } };
+		// char[][] matrix2 = new char[][] {
+		// { '0', '0', '0', '1', '0', '1', '1', '1' },
+		// { '0', '1', '1', '0', '0', '1', '0', '1' },
+		// { '1', '0', '1', '1', '1', '1', '0', '1' },
+		// { '0', '0', '0', '1', '0', '0', '0', '0' },
+		// { '0', '0', '1', '0', '0', '0', '1', '0' },
+		// { '1', '1', '1', '0', '0', '1', '1', '1' },
+		// { '1', '0', '0', '1', '1', '0', '0', '1' },
+		// { '0', '1', '0', '0', '1', '1', '0', '0' },
+		// { '1', '0', '0', '1', '0', '0', '0', '0' } };
+		// char[][] matrix3 = new char[][] { { '0', '1', '0', '0', '0' },
+		// { '1', '0', '0', '1', '1' }, { '1', '0', '0', '1', '1' } };
 
-		System.out.println(mr.maximalRectangle(matrix2));
+		System.out.println(mr.maximalRectangle2(matrix));
 
 	}
 }

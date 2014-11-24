@@ -14,80 +14,98 @@ package cn.sspku.zx.aad.daily;
  * 
  */
 public class CandyAssignment {
-
-	/**
-	 * 找到每一个局部最小值，设为1；从局部最小值分别从左上坡和右上坡递增1到局部最大值之前；最后在局部最大值的两旁取较大值加1即可。
-	 * 
-	 * @param ratings
-	 * @return
-	 */
 	public int candy(int[] ratings) {
 		if (null == ratings || ratings.length == 0)
 			return 0;
-
 		if (ratings.length == 1)
 			return 1;
 
-		int total = 0;
-		int[] candies = new int[ratings.length];
-
-		// 找到每一个局部最小值
-		int idx, minIndex, maxIndex = -1, leftVal, rightVal;
-		while (true) {
-			idx = maxIndex + 1;//从maxIndex的下一个开始分析
-			while (idx < ratings.length - 1 && ratings[idx] > ratings[idx + 1])
-				++idx;
-			minIndex = idx;
-			System.out.println(minIndex);
-			// 将局部最小值的糖果数量设置为1
-			candies[idx] = 1;
-			// 设置局部最小值的左上坡的糖果数量
-			if (minIndex != maxIndex)// 避免一开始便是右上坡
-			{
-				while (idx > maxIndex + 1 && ratings[idx - 1] > ratings[idx]) {
-					candies[idx - 1] = candies[idx] + 1;
-					--idx;
+		int idx = 0, preLen = 0, len, count = 0;
+		while (idx < ratings.length) {
+			// 判断上行坡道
+			len = lenOfUp(ratings, idx);
+			// 如果长度为1，则不是上行坡道；
+			if (len != 1) {
+				if (idx + len != ratings.length) {// 如果接下来是下坡，则需要计算下坡的长度，然后再来确定局部最高点的值
+					if (ratings[idx + len] != ratings[idx + len - 1]) {
+						preLen = len;
+						len = lenOfDown(ratings, idx + len - 1);
+						count += preLen * (preLen - 1) / 2 + len * (len - 1)
+								/ 2 + Math.max(preLen, len) - 1;// 下坡的终点不计算在内，所以要减去1
+						idx += (preLen + len - 2);// 如果下坡的终点为end,那么idx=end
+						if (idx == ratings.length-1) {
+							++idx;
+							++count;
+						}
+						System.out.println("count=" + count + "  idx=" + idx);
+					}
+					// 如果接下来是平缓的rating
+					else {
+						count += len * (len + 1) / 2;
+						idx += len;
+						System.out.println("count=" + count + "  idx=" + idx);
+					}
+				} else {
+					idx += len;
+					count += len * (len + 1) / 2;
 				}
-				// 在局部最大值的两旁取较大值加1
-				leftVal = rightVal = 1;
-				if (maxIndex > 0)
-					leftVal = ratings[maxIndex - 1] < ratings[maxIndex] ? candies[maxIndex - 1] + 1
-							: candies[maxIndex - 1];
-				if (maxIndex < ratings.length - 1)
-					rightVal = ratings[maxIndex + 1] < ratings[maxIndex] ? candies[maxIndex + 1] + 1
-							: candies[maxIndex + 1];
-				candies[maxIndex] = Math.max(leftVal, rightVal);
-			}
-			// 计算局部最小值的右上坡的糖果数量
-			if (minIndex != ratings.length - 1) {
-				idx = minIndex;
-				while (idx < ratings.length - 1
-						&& ratings[idx] < ratings[idx + 1]) {
-					candies[idx + 1] = candies[idx] + 1;
+			} else {
+				// 判断现在相等的rating的长度
+				len = lenOfEqual(ratings, idx);
+				count += (len - 1);
+				idx += len - 1;
+				if (idx == ratings.length - 1) {
 					++idx;
+					++count;
 				}
-				maxIndex = idx;
-				if (maxIndex == ratings.length - 1) {
-					candies[maxIndex] = ratings[maxIndex - 1] < ratings[maxIndex] ? candies[maxIndex - 1] + 1
-							: candies[maxIndex - 1];
-					break;
+				System.out.println("count=" + count + "  idx=" + idx);
+				// 判断下行坡道
+				len = lenOfDown(ratings, idx);
+				count += len * (len + 1) / 2 - 1;
+				idx += len - 1;
+				if (idx == ratings.length - 1) {
+					++idx;
+					++count;
 				}
-			} else
-				break;
+				System.out.println("count=" + count + "  idx=" + idx);
+			}
 		}
 
-		for (int i = 0; i < candies.length; ++i) {
-			System.out.printf("%5d", candies[i]);
-			total += candies[i];
-		}
-		System.out.println();
+		return count;
+	}
 
-		return total;
+	int lenOfUp(int[] ratings, int start) {
+		if (start >= ratings.length)
+			return 0;
+
+		int idx = start;
+		while (idx < ratings.length - 1 && ratings[idx] < ratings[idx + 1])
+			++idx;
+		return idx + 1 - start;
+	}
+
+	int lenOfDown(int[] ratings, int start) {
+		if (start >= ratings.length)
+			return 0;
+
+		int idx = start;
+		while (idx < ratings.length - 1 && ratings[idx] > ratings[idx + 1])
+			++idx;
+		return idx + 1 - start;
+	}
+
+	int lenOfEqual(int[] ratings, int start) {
+		if (start >= ratings.length)
+			return 0;
+
+		int idx = start;
+		while (idx < ratings.length - 1 && ratings[idx] == ratings[idx + 1])
+			++idx;
+		return idx + 1 - start;
 	}
 
 	public static void main(String[] args) {
 		CandyAssignment ca = new CandyAssignment();
-		System.out.println(ca.candy(new int[] { 1, 3, 3, 3, 2, 2 }));
+		System.out.println(ca.candy(new int[] { 1, 3, 2, 3, 3, 2, 2 }));
 	}
-
 }

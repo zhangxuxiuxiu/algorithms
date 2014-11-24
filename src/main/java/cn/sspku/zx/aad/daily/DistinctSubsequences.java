@@ -19,6 +19,7 @@ import java.util.Stack;
  * 
  */
 public class DistinctSubsequences {
+	// Time Limit Exceeding
 	public int numDistinct(String S, String T) {
 		if (null == T || null == S || S.length() < T.length())
 			return 0;
@@ -39,7 +40,7 @@ public class DistinctSubsequences {
 		int counter = 0;
 
 		// 查找S中对应的坐标
-		int idx = matchIndex(s, t, sIdx, tIdx);
+		int idx = findCharMatch(s, sIdx, t.charAt(tIdx));
 		// 如果找不到则不存匹配的情况
 		if (-1 == idx)
 			return 0;
@@ -72,73 +73,94 @@ public class DistinctSubsequences {
 		return counter;
 	}
 
-	class Match {
-		int sIndex, tIndex;
-
-		Match(int sIdx, int tIdx) {
-			sIndex = sIdx;
-			tIndex = tIdx;
-		}
-	}
-
-	//思路不清晰
-	int numMatch2(String s, String t) {
-		// stack.size()-1对应t的下标，而stack的值则对应s的下标
-		Stack<Match> stack = new Stack<Match>();
-		stack.push(new Match(-1, -1));
-		Match match = null;
-		int sIdx, tIdx, counter = 0, idx = 0;
-		boolean forward = true;
-
-		while (true) {
-			match = stack.peek();
-			sIdx = match.sIndex;
-			tIdx = match.tIndex;
-
-			idx = matchIndex(s, t, sIdx + 1, tIdx + 1);
-			if (-1 != idx) {
-				// 如果匹配的是t的最后一个元素，则完成一个完成的匹配
-				if (tIdx + 1 == t.length() - 1)
-					++counter;
-				stack.push(new Match(tIdx + 1, idx));
-			} else {
-				while (-1 == idx) {
-					stack.pop();
-					stack.push(new Match(idx, tIdx));
-					idx = matchIndex(s, t, sIdx + 1, tIdx);
-				}
-			}
-
-			while (-1 != (idx = matchIndex(s, t, sIdx + 1, tIdx))) {
-				++counter;
-			}
-		}
-	}
-
-	/**
-	 * 从s中下标sIdx开始，寻找与t中下标为tIdx相等的字符在s中的下标
-	 * 
-	 * @param s
-	 * @param t
-	 * @param sIdx
-	 * @param tIdx
-	 * @return
-	 */
-	int matchIndex(String s, String t, int sIdx, int tIdx) {
-		if (tIdx >= t.length() || tIdx < 0 || sIdx >= s.length() || sIdx < 0)
-			return -1;
-
-		while (sIdx < s.length() && s.charAt(sIdx) != t.charAt(tIdx))
-			++sIdx;
-
-		return sIdx == s.length() ? -1 : sIdx;
-	}
-
 	// Time Limit Exceeding
-	public static void main(String[] args) {
-		String s = "rabbbit", t = "rabbit";
+	public int numDistinct2(String S, String T) {
+		if (null == T || null == S || S.length() < T.length())
+			return 0;
 
+		int counter = 0, p = 0, idx;
+		Stack<Integer> stack = new Stack<Integer>();
+		while (true) {
+			// 匹配完整的一次
+			while (stack.size() < T.length() - 1) {
+				idx = findCharMatch(S, p, T.charAt(stack.size()));
+				if (idx != -1) {
+					stack.push(idx);
+					p = idx + 1;
+				} else
+					break;
+			}
+			// 完整匹配一次成功
+			if (stack.size() == T.length() - 1)
+				counter += countChars(S, p, T.charAt(T.length() - 1));
+
+			if (stack.size() > 0) {
+				p = stack.pop() + 1;
+			} else
+				return counter;
+		}
+	}
+
+	private int countChars(String s, int p, char ch) {
+		int counter = 0;
+		while (p < s.length()) {
+			if (s.charAt(p) == ch)
+				++counter;
+			++p;
+		}
+		return counter;
+	}
+
+	private int findCharMatch(String s, int p, char ch) {
+		if (p >= s.length() || p < 0)
+			return -1;
+		while (p < s.length() && ch != s.charAt(p))
+			++p;
+		return p == s.length() ? -1 : p;
+	}
+
+	// passed
+	public int numDistinct3(String s, String t) {
+		if (null == t || null == s || s.length() == 0 || t.length() == 0
+				|| s.length() < t.length())
+			return 0;
+
+		int[][] records = new int[s.length()][t.length()];
+		// 1> sIdx<tIdx
+		for (int tIdx = 0; tIdx < t.length(); ++tIdx)
+			for (int sIdx = 0; sIdx < tIdx; ++sIdx)
+				records[sIdx][tIdx] = 0;
+		// 2> tIdx=0
+		char ch = t.charAt(0);
+		int counter = 0;
+		for (int sIdx = 0; sIdx < s.length(); ++sIdx) {
+			if (s.charAt(sIdx) == ch)
+				++counter;
+			records[sIdx][0] = counter;
+		}
+		// 3> ...
+		for (int sIdx = 1; sIdx < s.length(); ++sIdx)
+			for (int tIdx = 1; tIdx < t.length(); ++tIdx)
+				if (s.charAt(sIdx) != t.charAt(tIdx))
+					records[sIdx][tIdx] = records[sIdx - 1][tIdx];
+				else {
+					counter = records[sIdx - 1][tIdx - 1];
+					ch = t.charAt(tIdx);
+					for (int idx = sIdx - 1; idx > 0; --idx)
+						if (ch == s.charAt(idx)) {
+							counter += records[idx][tIdx];
+							break;
+						}
+					records[sIdx][tIdx] = counter;
+				}
+
+		return records[s.length() - 1][t.length() - 1];
+	}
+
+	public static void main(String[] args) {
+		String s = "aabdbaabeeadcbbdedacbbeecbabebaeeecaeabaedadcbdbcdaabebdadbbaeabdadeaabbabbecebbebcaddaacccebeaeedababedeacdeaaaeeaecbe", t = "bddabdcae";
+		// String s = "aabb", t = "aab";
 		System.out.println("s=" + s + "  t=" + t + "  matches="
-				+ new DistinctSubsequences().numDistinct(s, t));
+				+ new DistinctSubsequences().numDistinct3(s, t));
 	}
 }

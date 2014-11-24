@@ -30,34 +30,38 @@ public class WildcardMatcher {
 	}
 
 	public boolean isMatch2(String str, String pattern) {
-		int s = 0, p = 0, match = 0, starIdx = -1;            
-        while (s < str.length()){
-            // advancing both pointers
-            if (p < pattern.length()  && (pattern.charAt(p) == '?' || str.charAt(s) == pattern.charAt(p))){
-                s++;
-                p++;
-            }
-            // * found, only advancing pattern pointer
-            else if (p < pattern.length() && pattern.charAt(p) == '*'){
-                starIdx = p;
-                match = s;
-                p++;
-            }
-           // last pattern pointer was *, advancing string pointer
-            else if (starIdx != -1){
-                p = starIdx + 1;              
-                s = ++match;
-            }
-           //current pattern pointer is not star, last patter pointer was not *
-          //characters do not match
-            else return false;
-        }
+		int s = 0, p = 0, match = 0, starIdx = -1;
+		while (s < str.length()) {
+			// advancing both pointers
+			if (p < pattern.length()
+					&& (pattern.charAt(p) == anyOne || str.charAt(s) == pattern
+							.charAt(p))) {
+				s++;
+				p++;
+			}
+			// * found, only advancing pattern pointer
+			else if (p < pattern.length() && pattern.charAt(p) == anySeq) {
+				starIdx = p;
+				match = s;// *可以匹配零个字母，所以s不用移动
+				p++;// *匹配零个字母的同时，p向后移一个字母
+			}
+			// last pattern pointer was *, advancing string pointer
+			else if (starIdx != -1) {
+				p = starIdx + 1;//如果*在前面匹配零个字母导致匹配错误，那么当前继续拿p进行匹配
+				s = ++match;//在前面p匹配的个数基础上再多匹配一个字母
+			}
+			// current pattern pointer is not star, last patter pointer was not
+			// *
+			// characters do not match
+			else
+				return false;
+		}
 
-        //check for remaining characters in pattern
-        while (p < pattern.length() && pattern.charAt(p) == '*')
-            p++;
+		// check for remaining characters in pattern
+		while (p < pattern.length() && pattern.charAt(p) == anySeq)
+			p++;
 
-        return p == pattern.length();
+		return p == pattern.length();
 	}
 
 	private static boolean match(String s, String p, int idx1, int idx2) {
@@ -153,8 +157,8 @@ public class WildcardMatcher {
 		 * "**aa*****ba*a*bb**aa*ab****a*aaaaaa***a*aaaa**bbabb*b*b**aaaaaaaaa*a********ba*bbb***a*ba*bb*bb**a*b*bb"
 		 * ;
 		 */
-		//String s = "aabcbcc", p = "*ab*b*c*";
-		String s = "aa", p = "a";
+		// String s = "aabcbcc", p = "*ab*b*c*";
+		String s = "abab", p = "*a*b";//
 
 		System.out.println("The string is :" + s + "\nThe match pattern is :"
 				+ p + "\nThe result is :" + wm.isMatch2(s, p));
