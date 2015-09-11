@@ -11,15 +11,15 @@ public class KMP {
 		List<Integer> matches = new LinkedList<Integer>();
 
 		int[] pre = computePrefix(pattern);
-		int q = 0;
+		int q = -1;
 		for (int idx = 0; idx < text.length(); ++idx) {
-			while (q > 0 && text.charAt(idx) != text.charAt(q + 1))
+			while (q > -1 && text.charAt(idx) != pattern.charAt(q + 1))
 				q = pre[q];
 			if (pattern.charAt(q + 1) == text.charAt(idx))
 				++q;
 			if (q == pattern.length())
 				matches.add(idx - pattern.length());
-			q = pre[q];
+			q = pre[q]+1;
 		}
 
 		return matches;
@@ -27,11 +27,11 @@ public class KMP {
 
 	private int[] computePrefix(String pattern) {
 		int[] pre = new int[pattern.length()];
-		pre[0] = 0;
-		int k = 0;
+		pre[0] = -1;
+		int k = -1;
 		for (int q = 1; q < pattern.length(); ++q) {
-			while (k > 0 && pattern.charAt(k + 1) != pattern.charAt(q))
-				k = pattern.charAt(k);
+			while (k > -1 && pattern.charAt(k + 1) != pattern.charAt(q))
+				k = pre[k];
 			if (pattern.charAt(k + 1) == pattern.charAt(q))
 				++k;
 			pre[q] = k;
@@ -39,4 +39,12 @@ public class KMP {
 
 		return pre;
 	}
+
+	public static void main(String[] args) {
+		KMP kmp = new KMP();
+		String text = "abababaababacb", pattern = "ababacb";
+		Utils.Print(kmp.computePrefix(pattern));// 0,0,1,2,3
+		Utils.PrintIterableInt(kmp.match(text, pattern));
+	}
+
 }

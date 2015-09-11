@@ -28,13 +28,12 @@ public class Utils {
 		System.out.println(str);
 	}
 
-	public static void Print(int[] array)
-	{
-		for(int idx=0;idx<array.length;++idx)
+	public static void Print(int[] array) {
+		for (int idx = 0; idx < array.length; ++idx)
 			System.out.printf("%5d", array[idx]);
 		System.out.println();
 	}
-	
+
 	public static void PrintListString(List<List<String>> list2) {
 		Iterator<List<String>> listIt = list2.iterator();
 		List<String> list;
@@ -46,6 +45,14 @@ public class Utils {
 			}
 			System.out.println();
 		}
+
+	}
+
+	public static void PrintIterableInt(Iterable<Integer> lds) {
+		Iterator<Integer> it = lds.iterator();
+		while (it.hasNext())
+			System.out.printf("%5d", it.next());
+		System.out.println();
 
 	}
 }

@@ -38,6 +38,11 @@ public class MaximalRectangle {
 
 	}
 
+	/**
+	 * this algorithm fails in some cases ?
+	 * @param matrix
+	 * @return
+	 */
 	public int maximalRectangle(char[][] matrix) {
 		if (null == matrix || matrix.length == 0 || matrix[0].length == 0)
 			return 0;
